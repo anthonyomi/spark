@@ -128,9 +128,9 @@
     const next = other(last.initiator);
     const cls = pClass(next?.id);
     $("#turn").innerHTML = next?.id === state.me
-      ? `It's <b class="${cls}">your</b> turn to initiate`
-      : `It's <b class="${cls}">${esc(next?.name)}</b>'s turn to initiate`;
-    $("#last").textContent = `Last: ${fmtWhen(last.occurred_at)} · ${nameOf(last.initiator)} initiated`;
+      ? `It's <b class="${cls}">your</b> turn to make the first move`
+      : `It's <b class="${cls}">${esc(next?.name)}</b>'s turn to make the first move`;
+    $("#last").textContent = `Last time: ${fmtWhen(last.occurred_at)} · ${nameOf(last.initiator)} initiated`;
   }
 
   function renderStats() {
