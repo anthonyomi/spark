@@ -25,7 +25,8 @@
 
   function demoStore() {
     const KEY = "spark-demo-entries";
-    const partners = (CFG.demoPartners || ["You", "Partner"]).slice(0, 2).map((name, i) => ({ id: i + 1, name }));
+    const partners = (CFG.demoPartners || ["You", "Partner"]).slice(0, 2)
+      .map((name, i) => ({ id: i + 1, name, avatar: (CFG.demoAvatars || [])[i] || null }));
     const listeners = [];
     const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
     const write = (v) => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} listeners.forEach((f) => f()); };
@@ -50,7 +51,7 @@
       async user() { return (await sb.auth.getSession()).data.session?.user || null; },
       async signIn(email, password) { check(await sb.auth.signInWithPassword({ email, password })); },
       async signOut() { await sb.auth.signOut(); },
-      async partners() { return check(await sb.from("partners").select("id,name,email").order("id")); },
+      async partners() { return check(await sb.from("partners").select("*").order("id")); },
       async list() {
         return check(await sb.from("entries").select("id,occurred_at,initiator,note").order("occurred_at", { ascending: false }));
       },
@@ -73,6 +74,12 @@
   const other = (id) => state.partners.find((p) => p.id !== id);
   const pClass = (id) => "p" + (state.partners.findIndex((p) => p.id === id) + 1);
   const nameOf = (id) => (id === state.me ? "You" : partner(id)?.name || "?");
+  function avatar(id, cls = "av") {
+    const p = partner(id);
+    return p?.avatar
+      ? `<img class="${cls}" src="${esc(p.avatar)}" alt="${esc(p.name)}">`
+      : `<span class="${cls} av-fallback ${pClass(id)}">${esc((p?.name || "?")[0])}</span>`;
+  }
 
   function fmtDuration(ms) {
     ms = Math.abs(ms);
@@ -105,6 +112,16 @@
     const fill = $("#ring-fill");
     fill.style.strokeDasharray = RING_C;
     const home = $("#home");
+    const next = last ? other(last.initiator) : null;
+    // the person whose turn it is gets highlighted; the other fades back a little
+    state.partners.slice(0, 2).forEach((p, i) => {
+      const el = $(i === 0 ? "#av-left" : "#av-right");
+      const isNext = next && p.id === next.id;
+      el.className = "hero-av" + (next ? (isNext ? " next" : " waiting") : "");
+      el.innerHTML = avatar(p.id, "hero-img") +
+        `<div class="av-name ${pClass(p.id)}">${esc(p.id === state.me ? "You" : p.name)}</div>` +
+        (isNext ? `<div class="av-badge">♥ ${p.id === state.me ? "You're up" : "Next"}</div>` : "");
+    });
 
     if (!last) {
       home.dataset.level = "ok";
@@ -125,7 +142,6 @@
     $("#time-left").textContent = fmtDuration(remaining);
     $("#time-sub").textContent = remaining > 0 ? "left" : "overdue";
 
-    const next = other(last.initiator);
     const cls = pClass(next?.id);
     $("#turn").innerHTML = next?.id === state.me
       ? `It's <b class="${cls}">your</b> turn to make the first move`
@@ -173,7 +189,7 @@
       <div class="bar">${state.partners.map((p, i) =>
         `<span style="width:${(counts[i] / total) * 100}%;background:var(--p${i + 1})"></span>`).join("")}</div>
       <div class="names">${state.partners.map((p, i) =>
-        `<span><span class="dot p${i + 1}"></span> ${esc(p.name)} · ${counts[i]}</span>`).join("")}</div>`;
+        `<span class="who">${avatar(p.id, "av av-sm")} ${esc(p.name)} · <b>${counts[i]}</b></span>`).join("")}</div>`;
   }
 
   function renderCalendar() {
@@ -200,13 +216,17 @@
         key === state.selectedDay && "selected",
         date.getTime() > now && "future",
         key === deadlineKey && "deadline"].filter(Boolean).join(" ");
-      html += `<button class="${cls}" data-day="${key}" data-date="${date.toISOString()}">${d}
-        <span class="dots">${list.map((e) => `<span class="dot ${pClass(e.initiator)}"></span>`).join("")}</span></button>`;
+      const latest = list[list.length - 1];
+      html += latest
+        ? `<button class="${cls} stamped ${pClass(latest.initiator)}" data-day="${key}">
+            ${avatar(latest.initiator, "stamp")}<span class="num">${d}</span>
+            ${list.length > 1 ? `<span class="count">×${list.length}</span>` : ""}</button>`
+        : `<button class="${cls}" data-day="${key}">${d}</button>`;
     }
     $("#cal").innerHTML = html;
 
     $("#legend").innerHTML =
-      state.partners.map((p) => `<span><span class="dot ${pClass(p.id)}"></span>${esc(p.name)} initiated</span>`).join("") +
+      state.partners.map((p) => `<span>${avatar(p.id, "av av-xs")}${esc(p.name)} initiated</span>`).join("") +
       (deadlineKey ? `<span><span class="dl"></span>Deadline</span>` : "");
 
     renderDayDetail(byDay);
@@ -223,7 +243,7 @@
     box.innerHTML = `<h3>${esc(label)}</h3>` + (list.length
       ? list.map((e) => `
         <div class="entry">
-          <span class="dot ${pClass(e.initiator)}"></span>
+          ${avatar(e.initiator, "av av-md")}
           <div class="meta">
             <div>${esc(fmtTime(e.occurred_at))} · ${esc(nameOf(e.initiator))} initiated</div>
             ${e.note ? `<div class="note">${esc(e.note)}</div>` : ""}

@@ -11,4 +11,5 @@ window.SPARK_CONFIG = {
 
   // Only used in demo mode — in live mode names come from the partners table
   demoPartners: ["Anthony", "Bolaji"],
+  demoAvatars: [],
 };

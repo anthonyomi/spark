@@ -1,5 +1,5 @@
 // Network-first cache so the app opens offline but always picks up new deploys.
-const CACHE = "spark-v2";
+const CACHE = "spark-v3";
 const SHELL = ["./", "index.html", "styles.css", "app.js", "config.js", "icon.svg", "manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
