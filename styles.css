@@ -136,11 +136,10 @@ legend { font-size: .9rem; color: var(--muted); padding: 0; margin-bottom: 6px; 
   width: 100%; max-width: 130px; aspect-ratio: 1; object-fit: contain;
   -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
           mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
-  transition: transform .4s ease, opacity .4s ease, filter .4s ease;
+  transition: filter .4s ease;
 }
 span.hero-img { -webkit-mask-image: none; mask-image: none; border-radius: 50%; max-width: 72px; font-size: 1.8rem; }
-.hero-av.next .hero-img { transform: scale(1.08); filter: drop-shadow(0 8px 14px rgba(232, 48, 79, .35)); }
-.hero-av.waiting .hero-img { opacity: .6; filter: saturate(.75); }
+.hero-av.next .hero-img { filter: drop-shadow(0 8px 14px rgba(232, 48, 79, .35)); }
 .av-name { margin-top: -6px; font-size: .85rem; font-weight: 700; }
 .av-name.p1 { color: var(--p1); }
 .av-name.p2 { color: var(--p2); }
