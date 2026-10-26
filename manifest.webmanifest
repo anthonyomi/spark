@@ -1,0 +1,13 @@
+{
+  "name": "Spark",
+  "short_name": "Spark",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#140c18",
+  "theme_color": "#140c18",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

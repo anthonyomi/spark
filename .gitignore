@@ -1,0 +1,4 @@
+# private: contains emails and secret ntfy topics
+supabase/
+.claude/
+.DS_Store
